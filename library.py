@@ -343,3 +343,21 @@ class CustomOHETransformer(BaseEstimator, TransformerMixin):
     def fit_transform(self, X: pd.DataFrame, y: Optional[Any] = None) -> pd.DataFrame:
         result = self.transform(X)
         return result
+
+
+titanic_transformer = Pipeline(steps=[
+    ('gender', CustomMappingTransformer('Gender', {'Male': 0, 'Female': 1})),
+    ('class', CustomMappingTransformer('Class', {'Crew': 0, 'C3': 1, 'C2': 2, 'C1': 3})),
+    #add your new ohe step below
+    ('ohe', CustomOHETransformer(target_column='Joined')),
+    ], verbose=True)
+
+customer_transformer = Pipeline(steps=[
+    #fill in the steps on your own
+    ('Drop Rating', CustomDropColumnsTransformer(['Rating'], 'drop')),
+    ('Drop ID', CustomDropColumnsTransformer(['ID'], 'drop')),
+    ('OHE OS', CustomOHETransformer(target_column='OS')),
+    ('OHE ISP', CustomOHETransformer(target_column='ISP')),
+    ('Map Gender', CustomMappingTransformer('Gender', {'Male': 0, 'Female': 1})),
+    ('Map Experience Level', CustomMappingTransformer('Experience Level', {'low': 0, 'medium': 1, 'high': 2})),
+    ], verbose=True)
