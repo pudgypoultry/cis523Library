@@ -450,6 +450,110 @@ class CustomSigma3Transformer(BaseEstimator, TransformerMixin):
         return self.transform(X)
 
 
+class CustomSigma3Transformer(BaseEstimator, TransformerMixin):
+    """
+    A transformer that applies 3-sigma clipping to a specified column in a pandas DataFrame.
+
+    This transformer follows the scikit-learn transformer interface and can be used in
+    a scikit-learn pipeline. It clips values in the target column to be within three standard
+    deviations from the mean.
+
+    Parameters
+    ----------
+    target_column : Hashable
+        The name of the column to apply 3-sigma clipping on.
+
+    Attributes
+    ----------
+    high_wall : Optional[float]
+        The upper bound for clipping, computed as mean + 3 * standard deviation.
+    low_wall : Optional[float]
+        The lower bound for clipping, computed as mean - 3 * standard deviation.
+    """
+    def __init__(self, the_column: str):
+        self.has_been_fit = False
+        self.target_column = the_column
+        self.high_wall = None
+        self.low_wall = None
+
+    def fit(self, X: pd.DataFrame, y=None):
+        """
+        Compute the upper and lower walls for 3-sigma clipping.
+
+        Parameters
+        ----------
+        X : pandas DataFrame
+
+        y : Ignored
+            Not used, present here for API consistency by convention.
+
+        Returns
+        -------
+        self : object
+            Returns self.
+            """
+        assert isinstance(X, pd.core.frame.DataFrame), f'expected Dataframe but got {type(df)} instead.'
+        assert self.target_column in X.columns.to_list(), f'unknown column {self.target_column}'
+        assert pd.api.types.is_numeric_dtype(X[self.target_column]), f'expected int or float in column {self.target_column}'
+
+        self.has_been_fit = True
+
+        # Compute the mean and standard deviation of the column
+        mean = X[self.target_column].mean()
+        std = X[self.target_column].std()
+
+        # Compute the low and high boundaries
+        low = mean - 3 * std
+        high = mean + 3 * std
+
+        # Return the boundaries
+        self.low_wall, self.high_wall = low, high
+
+
+    def transform(self, X: pd.DataFrame):
+        """
+        Clip values in the target column to be within three standard deviations from the mean.
+
+        Parameters
+        ----------
+        X : pandas DataFrame
+            The input DataFrame.
+
+        Returns
+        -------
+        pandas DataFrame
+            A copy of the input DataFrame with the target column clipped.
+        """
+        assert self.has_been_fit, 'Sigma3Transformer.fit has not been called.'
+        assert isinstance(X, pd.core.frame.DataFrame), f'expected Dataframe but got {type(X)} instead.'
+        assert self.target_column in X.columns.to_list(), f'unknown column {self.target_column}'
+        assert pd.api.types.is_numeric_dtype(X[self.target_column]), f'expected int or float in column {self.target_column}'
+        assert self.high_wall is not None and self.low_wall is not None, 'Sigma3Transformer.fit has not been called.'
+        X[self.target_column] = X[self.target_column].clip(lower=self.low_wall, upper=self.high_wall)
+        X = X.reset_index(drop=True)
+        return X
+        
+
+    def fit_transform(self, X: pd.DataFrame, y=None):
+        """
+        Compute the upper and lower walls for 3-sigma
+        clipping and apply the transformation.
+
+        Parameters
+        ----------
+        X : pandas DataFrame
+        y : Ignored
+            Not used, present here for API consistency by convention.
+
+        Returns
+        -------
+        pandas DataFrame
+            A copy of the input DataFrame with the target column clipped.
+        """
+        self.fit(X, y)
+        return self.transform(X)
+
+
 
 
 
@@ -469,3 +573,4 @@ customer_transformer = Pipeline(steps=[
     ('Map Gender', CustomMappingTransformer('Gender', {'Male': 0, 'Female': 1})),
     ('Map Experience Level', CustomMappingTransformer('Experience Level', {'low': 0, 'medium': 1, 'high': 2})),
     ], verbose=True)
+
