@@ -573,25 +573,25 @@ class CustomRobustTransformer(BaseEstimator, TransformerMixin):
 
 
 class CustomKNNTransformer(BaseEstimator, TransformerMixin):
-      """Imputes missing values using KNN.
-    
-      This transformer wraps the KNNImputer from scikit-learn and hard-codes
-      add_indicator to be False. It also ensures that the input and output
-      are pandas DataFrames.
-    
-      Parameters
-      ----------
-      n_neighbors : int, default=5
-          Number of neighboring samples to use for imputation.
-      weights : {'uniform', 'distance'}, default='uniform'
-          Weight function used in prediction. Possible values:
-          "uniform" : uniform weights. All points in each neighborhood
-          are weighted equally.
-          "distance" : weight points by the inverse of their distance.
-          in this case, closer neighbors of a query point will have a
-          greater influence than neighbors which are further away.
-      """
-      #your code below
+    """Imputes missing values using KNN.
+
+    This transformer wraps the KNNImputer from scikit-learn and hard-codes
+    add_indicator to be False. It also ensures that the input and output
+    are pandas DataFrames.
+
+    Parameters
+    ----------
+    n_neighbors : int, default=5
+        Number of neighboring samples to use for imputation.
+    weights : {'uniform', 'distance'}, default='uniform'
+        Weight function used in prediction. Possible values:
+        "uniform" : uniform weights. All points in each neighborhood
+        are weighted equally.
+        "distance" : weight points by the inverse of their distance.
+        in this case, closer neighbors of a query point will have a
+        greater influence than neighbors which are further away.
+    """
+    #your code below
     def __init__(self, n_neighbors=5, weights='uniform'):
         self.n_neighbors = n_neighbors
         self.weights = weights
