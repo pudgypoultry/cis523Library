@@ -507,6 +507,70 @@ class CustomTukeyTransformer(BaseEstimator, TransformerMixin):
         return self.transform(X2)
 
 
+class CustomRobustTransformer(BaseEstimator, TransformerMixin):
+    """Applies robust scaling to a specified column in a pandas DataFrame.
+      This transformer calculates the interquartile range (IQR) and median
+      during the `fit` method and then uses these values to scale the
+      target column in the `transform` method.
+
+      Parameters
+      ----------
+      column : str
+          The name of the column to be scaled.
+
+      Attributes
+      ----------
+      target_column : str
+          The name of the column to be scaled.
+      iqr : float
+          The interquartile range of the target column.
+      med : float
+          The median of the target column.
+    """
+    def __init__(self, column):
+        self.column = column
+        self.iqr = None
+        self.med = None
+        self.has_fit = False
+
+    def fit(self, X, y=None):
+        assert self.column in X.columns, f"Column '{self.column}' not found in DataFrame."
+
+        self.has_fit = True
+        # Calculate the IQR and median for the specified column, handling potential errors
+        try:
+            self.iqr = X[self.column].quantile(0.75) - X[self.column].quantile(0.25)
+            self.med = X[self.column].median()
+            # Check if iqr is zero
+            if self.iqr == 0:
+              print(f"Warning: IQR for column '{self.column}' is zero. Scaling will be skipped.")
+              
+        except Exception as e:
+          print(f"Error during fit: {e}")
+          self.iqr = None
+          self.med = None
+          
+        return self
+
+
+    def transform(self, X):
+        # Create a copy to avoid modifying the original DataFrame
+        X_transformed = X.copy()
+
+        # Check if the specified column exists
+        assert self.has_fit, "NotFittedError: This CustomRobustTransformer instance is not fitted yet. Call 'fit' with appropriate arguments before using this estimator."
+        assert self.column in X_transformed.columns, f"Column '{self.column}' not found in DataFrame."
+            
+        if self.iqr is not None and self.iqr != 0 :
+            # Apply robust scaling to the specified column
+            X_transformed[self.column] = (X_transformed[self.column] - self.med) / self.iqr
+        
+        return X_transformed
+    
+    def fit_transform(self, X, y=None, **fit_params):
+       return super().fit_transform(X, y, **fit_params)
+
+
 # For non-Challenge parts
 titanic_transformer_test = Pipeline(steps=[
     ('gender', CustomMappingTransformer('Gender', {'Male': 0, 'Female': 1})),
@@ -533,5 +597,6 @@ customer_transformer = Pipeline(steps=[
     ('Map Gender', CustomMappingTransformer('Gender', {'Male': 0, 'Female': 1})),
     ('Map Experience Level', CustomMappingTransformer('Experience Level', {'low': 0, 'medium': 1, 'high': 2})),
     ('time spent', CustomTukeyTransformer('Time Spent', 'inner')),
+    ('Scalar - Time Spent', CustomRobustTransformer('Time Spent')
     ], verbose=True)
 
