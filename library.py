@@ -597,6 +597,6 @@ customer_transformer = Pipeline(steps=[
     ('Map Gender', CustomMappingTransformer('Gender', {'Male': 0, 'Female': 1})),
     ('Map Experience Level', CustomMappingTransformer('Experience Level', {'low': 0, 'medium': 1, 'high': 2})),
     ('time spent', CustomTukeyTransformer('Time Spent', 'inner')),
-    ('Scalar - Time Spent', CustomRobustTransformer('Time Spent')
+    ('Scalar - Time Spent', CustomRobustTransformer('Time Spent')),
     ], verbose=True)
 
