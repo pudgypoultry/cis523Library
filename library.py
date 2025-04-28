@@ -441,7 +441,7 @@ class CustomTukeyTransformer(BaseEstimator, TransformerMixin):
 #     """
 
     def __init__(self, column: str, fence: str = 'outer'):
-        self.target_column = column
+        self.column = column
         self.fence = fence
         self.inner_low = None
         self.outer_low = None
@@ -454,15 +454,15 @@ class CustomTukeyTransformer(BaseEstimator, TransformerMixin):
         Compute the inner and outer fences for Tukey's method.
         """
         # assert isinstance(X, pd.DataFrame), f"Expected DataFrame, got {type(X)}"
-        assert self.target_column in X.columns, f"Column '{self.target_column}' not found"
+        assert self.column in X.columns, f"Column '{self.column}' not found"
         assert self.fence in ['inner', 'outer'], f"Invalid 'fence' value. Must be 'inner' or 'outer'."
         #assert pd.api.types.is_numeric_dtype(X[self.target_column]), f"Column '{self.target_column}' must be numeric"
 
         X2 = X.copy()
         self.has_been_fit = True
 
-        q1 = X2[self.target_column].quantile(0.25)
-        q3 = X2[self.target_column].quantile(0.75)
+        q1 = X2[self.column].quantile(0.25)
+        q3 = X2[self.column].quantile(0.75)
         the_iqr = q3 - q1
 
         self.inner_low = q1 - 1.5 * the_iqr
@@ -477,7 +477,7 @@ class CustomTukeyTransformer(BaseEstimator, TransformerMixin):
         """
         assert self.has_been_fit, "Fit method has not been called."
         # assert isinstance(X, pd.DataFrame), f"Expected DataFrame, got {type(X)}"
-        assert self.target_column in X.columns, f"Column '{self.target_column}' not found"
+        assert self.column in X.columns, f"Column '{self.column}' not found"
         #assert pd.api.types.is_numeric_dtype(X[self.target_column]), f"Column '{self.target_column}' must be numeric"
         X2 = X.copy()
         low_bound = -float('inf')
@@ -493,7 +493,7 @@ class CustomTukeyTransformer(BaseEstimator, TransformerMixin):
         #print("Clipping with respect to: ", self.fence)
         #print("Low bound: ", low_bound)
         #print("High bound: ", high_bound)
-        X2[self.target_column] = X2[self.target_column].clip(lower=low_bound, upper=high_bound)
+        X2[self.column] = X2[self.column].clip(lower=low_bound, upper=high_bound)
         X2 = X2.reset_index(drop=True)
 
         return X2
