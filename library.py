@@ -366,9 +366,9 @@ class CustomSigma3Transformer(BaseEstimator, TransformerMixin):
     low_wall : Optional[float]
         The lower bound for clipping, computed as mean - 3 * standard deviation.
     """
-    def __init__(self, the_column: str):
+    def __init__(self, column: str):
         self.has_been_fit = False
-        self.target_column = the_column
+        self.target_column = column
         self.high_wall = None
         self.low_wall = None
         self.mean = None
@@ -440,9 +440,9 @@ class CustomTukeyTransformer(BaseEstimator, TransformerMixin):
 #     >>> transformed_df
 #     """
 
-    def __init__(self, the_column: str, the_fence: str = 'outer'):
-        self.target_column = the_column
-        self.fence = the_fence
+    def __init__(self, column: str, fence: str = 'outer'):
+        self.target_column = column
+        self.fence = fence
         self.inner_low = None
         self.outer_low = None
         self.inner_high = None
