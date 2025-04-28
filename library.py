@@ -5,6 +5,7 @@ import types
 import warnings
 from typing import Dict, Any, Optional, Union, List, Set, Hashable, Literal, Tuple, Self, Iterable
 from sklearn.base import BaseEstimator, TransformerMixin
+from sklearn.impute import KNNImputer
 from sklearn.pipeline import Pipeline
 import sklearn
 sklearn.set_config(transform_output="pandas")  #says pass pandas tables through pipeline instead of numpy matrices
@@ -569,6 +570,51 @@ class CustomRobustTransformer(BaseEstimator, TransformerMixin):
     
     def fit_transform(self, X, y=None, **fit_params):
        return super().fit_transform(X, y, **fit_params)
+
+
+class CustomKNNTransformer(BaseEstimator, TransformerMixin):
+      """Imputes missing values using KNN.
+    
+      This transformer wraps the KNNImputer from scikit-learn and hard-codes
+      add_indicator to be False. It also ensures that the input and output
+      are pandas DataFrames.
+    
+      Parameters
+      ----------
+      n_neighbors : int, default=5
+          Number of neighboring samples to use for imputation.
+      weights : {'uniform', 'distance'}, default='uniform'
+          Weight function used in prediction. Possible values:
+          "uniform" : uniform weights. All points in each neighborhood
+          are weighted equally.
+          "distance" : weight points by the inverse of their distance.
+          in this case, closer neighbors of a query point will have a
+          greater influence than neighbors which are further away.
+      """
+      #your code below
+    def __init__(self, n_neighbors=5, weights='uniform'):
+        self.n_neighbors = n_neighbors
+        self.weights = weights
+        self.knn_imputer = KNNImputer(n_neighbors=n_neighbors, weights=weights, add_indicator=False)
+        self.has_been_fit = False
+
+    def fit(self, X, y=None):
+        assert isinstance(X, pd.DataFrame), "Input must be a dataframe"
+        if self.n_neighbors > len(X):
+            print("Warning: K must be greater than number of samples")
+        self.has_been_fit = True
+        self.knn_imputer.fit(X, y)
+        return self
+
+    def transform(self, X, y=None):
+        assert self.has_been_fit, "NotFittedError: This CustomKNNTransformer instance is not fitted yet. Call 'fit' with appropriate arguments before using this estimator."
+        assert isinstance(X, pd.DataFrame), "Input must be a dataframe"
+        X = pd.DataFrame(self.knn_imputer.transform(X), columns=X.columns)
+        return X
+
+    def fit_transform(self, X, y=None):
+        assert isinstance(X, pd.DataFrame), "Input must be a dataframe"
+        return self.fit(X).transform(X)
 
 
 # For non-Challenge parts
