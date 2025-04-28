@@ -349,22 +349,6 @@ class CustomOHETransformer(BaseEstimator, TransformerMixin):
 class CustomSigma3Transformer(BaseEstimator, TransformerMixin):
     """
     A transformer that applies 3-sigma clipping to a specified column in a pandas DataFrame.
-
-    This transformer follows the scikit-learn transformer interface and can be used in
-    a scikit-learn pipeline. It clips values in the target column to be within three standard
-    deviations from the mean.
-
-    Parameters
-    ----------
-    target_column : Hashable
-        The name of the column to apply 3-sigma clipping on.
-
-    Attributes
-    ----------
-    high_wall : Optional[float]
-        The upper bound for clipping, computed as mean + 3 * standard deviation.
-    low_wall : Optional[float]
-        The lower bound for clipping, computed as mean - 3 * standard deviation.
     """
     def __init__(self, target_column: str):
         self.has_been_fit = False
@@ -373,82 +357,33 @@ class CustomSigma3Transformer(BaseEstimator, TransformerMixin):
         self.low_wall = None
 
     def fit(self, X: pd.DataFrame, y=None):
-        """
-        Compute the upper and lower walls for 3-sigma clipping.
-
-        Parameters
-        ----------
-        X : pandas DataFrame
-
-        y : Ignored
-            Not used, present here for API consistency by convention.
-
-        Returns
-        -------
-        self : object
-            Returns self.
-            """
-        assert isinstance(X, pd.core.frame.DataFrame), f'expected Dataframe but got {type(df)} instead.'
+        """Computes the low and high boundaries for clipping."""
+        #assert isinstance(X, pd.core.frame.DataFrame), f'expected Dataframe but got {type(X)} instead.'
         assert self.target_column in X.columns.to_list(), f'unknown column {self.target_column}'
         assert pd.api.types.is_numeric_dtype(X[self.target_column]), f'expected int or float in column {self.target_column}'
 
         self.has_been_fit = True
-
-        # Compute the mean and standard deviation of the column
         mean = X[self.target_column].mean()
         std = X[self.target_column].std()
+        self.low_wall = mean - 3 * std
+        self.high_wall = mean + 3 * std
+        return self
 
-        # Compute the low and high boundaries
-        low_boundary = mean - 3 * std
-        high_boundary = mean + 3 * std
-
-        # Return the boundaries
-        self.low_wall, self.high_wall = low_boundary, high_boundary
-
-
-    def transform(self, X: pd.DataFrame):
-        """
-        Clip values in the target column to be within three standard deviations from the mean.
-
-        Parameters
-        ----------
-        X : pandas DataFrame
-            The input DataFrame.
-
-        Returns
-        -------
-        pandas DataFrame
-            A copy of the input DataFrame with the target column clipped.
-        """
-        assert self.has_been_fit, 'Sigma3Transformer.fit has not been called.'
-        assert isinstance(X, pd.core.frame.DataFrame), f'expected Dataframe but got {type(X)} instead.'
+    def transform(self, X: pd.DataFrame) -> pd.DataFrame:
+        """Clips values in the target column to be within three standard deviations from the mean."""
+        #assert isinstance(X, pd.core.frame.DataFrame), f'expected Dataframe but got {type(X)} instead.'
         assert self.target_column in X.columns.to_list(), f'unknown column {self.target_column}'
-        assert pd.api.types.is_numeric_dtype(X[self.target_column]), f'expected int or float in column {self.target_column}'
-        assert self.high_wall is not None and self.low_wall is not None, 'Sigma3Transformer.fit has not been called.'
-        X[self.target_column] = X[self.target_column].clip(lower=self.low_wall, upper=self.high_wall)
-        X = X.reset_index(drop=True)
-        return X
+        assert self.has_been_fit, 'Sigma3Transformer.fit has not been called.'
         
+        # Create a new column with clipped values
+        X[f'Clipped_{self.target_column}'] = X[self.target_column].clip(lower=self.low_wall, upper=self.high_wall)
+        
+        return X.reset_index(drop=True)
 
     def fit_transform(self, X: pd.DataFrame, y=None):
-        """
-        Compute the upper and lower walls for 3-sigma
-        clipping and apply the transformation.
-
-        Parameters
-        ----------
-        X : pandas DataFrame
-        y : Ignored
-            Not used, present here for API consistency by convention.
-
-        Returns
-        -------
-        pandas DataFrame
-            A copy of the input DataFrame with the target column clipped.
-        """
+        """Computes the low and high boundaries for clipping and applies them to the target column."""
         self.fit(X, y)
         return self.transform(X)
-
 
 class CustomTukeyTransformer(BaseEstimator, TransformerMixin):
 #     """
@@ -480,9 +415,9 @@ class CustomTukeyTransformer(BaseEstimator, TransformerMixin):
 #     >>> transformed_df
 #     """
 
-    def __init__(self, target_column: str, fence: Literal['inner', 'outer'] = 'outer'):
-        self.target_column = target_column
-        self.fence = fence
+    def __init__(self, the_column: str, the_fence: str = 'outer'):
+        self.target_column = the_column
+        self.fence = the_fence
         self.inner_low = None
         self.outer_low = None
         self.inner_high = None
@@ -493,10 +428,11 @@ class CustomTukeyTransformer(BaseEstimator, TransformerMixin):
         """
         Compute the inner and outer fences for Tukey's method.
         """
-        assert isinstance(X, pd.DataFrame), f"Expected DataFrame, got {type(X)}"
+        # assert isinstance(X, pd.DataFrame), f"Expected DataFrame, got {type(X)}"
         assert self.target_column in X.columns, f"Column '{self.target_column}' not found"
-        assert pd.api.types.is_numeric_dtype(X[self.target_column]), f"Column '{self.target_column}' must be numeric"
-        
+        assert self.fence in ['inner', 'outer'], f"Invalid 'fence' value. Must be 'inner' or 'outer'."
+        #assert pd.api.types.is_numeric_dtype(X[self.target_column]), f"Column '{self.target_column}' must be numeric"
+
         self.has_been_fit = True
 
         q1 = X[self.target_column].quantile(0.25)
@@ -507,7 +443,6 @@ class CustomTukeyTransformer(BaseEstimator, TransformerMixin):
         self.outer_low = q1 - 3 * the_iqr
         self.inner_high = q3 + 1.5 * the_iqr
         self.outer_high = q3 + 3 * the_iqr
-
         return self
 
     def transform(self, X: pd.DataFrame):
@@ -515,10 +450,11 @@ class CustomTukeyTransformer(BaseEstimator, TransformerMixin):
         Clip values in the target column based on the computed fences.
         """
         assert self.has_been_fit, "Fit method has not been called."
-        assert isinstance(X, pd.DataFrame), f"Expected DataFrame, got {type(X)}"
+        # assert isinstance(X, pd.DataFrame), f"Expected DataFrame, got {type(X)}"
         assert self.target_column in X.columns, f"Column '{self.target_column}' not found"
         assert pd.api.types.is_numeric_dtype(X[self.target_column]), f"Column '{self.target_column}' must be numeric"
-
+        low_bound = -float('inf')
+        high_bound = -float('inf')
         if self.fence == 'inner':
             low_bound = self.inner_low
             high_bound = self.inner_high
@@ -527,11 +463,20 @@ class CustomTukeyTransformer(BaseEstimator, TransformerMixin):
             high_bound = self.outer_high
         else:
             raise ValueError("Invalid 'fence' value. Must be 'inner' or 'outer'.")
-
+        #print("Clipping with respect to: ", self.fence)
+        #print("Low bound: ", low_bound)
+        #print("High bound: ", high_bound)
         X[self.target_column] = X[self.target_column].clip(lower=low_bound, upper=high_bound)
         X = X.reset_index(drop=True)
 
         return X
+
+    def fit_transform(self, X: pd.DataFrame, y=None):
+        """
+        Compute the inner and outer fences and clip values in the target column.
+        """
+        self.fit(X, y)
+        return self.transform(X)
 
 
 # For non-Challenge parts
