@@ -379,12 +379,12 @@ class CustomSigma3Transformer(BaseEstimator, TransformerMixin):
         #assert isinstance(X, pd.core.frame.DataFrame), f'expected Dataframe but got {type(df)} instead.'
         assert self.target_column in X.columns.to_list(), f'unknown column {self.target_column}'
         assert pd.api.types.is_numeric_dtype(X[self.target_column]), f'expected int or float in column {self.target_column}'
-
+        X2 = X.copy()
         self.has_been_fit = True
 
         # Compute the mean and standard deviation of the column
-        self.mean = X[self.target_column].mean()
-        self.std = X[self.target_column].std()
+        self.mean = X2[self.target_column].mean()
+        self.std = X2[self.target_column].std()
 
         # Compute the low and high boundaries
         self.low_wall = self.mean - 3 * self.std
@@ -398,14 +398,16 @@ class CustomSigma3Transformer(BaseEstimator, TransformerMixin):
         assert self.target_column in X.columns.to_list(), f'unknown column {self.target_column}'
         #assert pd.api.types.is_numeric_dtype(X[self.target_column]), f'expected int or float in column {self.target_column}'
 
-        X[self.target_column] = X[self.target_column].clip(lower=self.low_wall, upper=self.high_wall)
-        X = X.reset_index(drop=True)
-        return X
+        X2 = X.copy()
+        X2[self.target_column] = X2[self.target_column].clip(lower=self.low_wall, upper=self.high_wall)
+        #X = X.reset_index(drop=True)
+        return X2
 
 
     def fit_transform(self, X: pd.DataFrame, y=None):
-        self.fit(X, y)
-        return self.transform(X)
+        X2 = X.copy()
+        self.fit(X2, y)
+        return self.transform(X2)
 
 
 class CustomTukeyTransformer(BaseEstimator, TransformerMixin):
@@ -454,12 +456,13 @@ class CustomTukeyTransformer(BaseEstimator, TransformerMixin):
         # assert isinstance(X, pd.DataFrame), f"Expected DataFrame, got {type(X)}"
         assert self.target_column in X.columns, f"Column '{self.target_column}' not found"
         assert self.fence in ['inner', 'outer'], f"Invalid 'fence' value. Must be 'inner' or 'outer'."
-        #assert pd.api.types.is_numeric_dtype(X[self.target_column]), f"Column '{self.target_column}' must be numeric"
+        assert pd.api.types.is_numeric_dtype(X[self.target_column]), f"Column '{self.target_column}' must be numeric"
 
+        X2 = X.copy()
         self.has_been_fit = True
 
-        q1 = X[self.target_column].quantile(0.25)
-        q3 = X[self.target_column].quantile(0.75)
+        q1 = X2[self.target_column].quantile(0.25)
+        q3 = X2[self.target_column].quantile(0.75)
         the_iqr = q3 - q1
 
         self.inner_low = q1 - 1.5 * the_iqr
@@ -475,9 +478,10 @@ class CustomTukeyTransformer(BaseEstimator, TransformerMixin):
         assert self.has_been_fit, "Fit method has not been called."
         # assert isinstance(X, pd.DataFrame), f"Expected DataFrame, got {type(X)}"
         assert self.target_column in X.columns, f"Column '{self.target_column}' not found"
-        #assert pd.api.types.is_numeric_dtype(X[self.target_column]), f"Column '{self.target_column}' must be numeric"
+        assert pd.api.types.is_numeric_dtype(X[self.target_column]), f"Column '{self.target_column}' must be numeric"
+        X2 = X.copy()
         low_bound = -float('inf')
-        high_bound = -float('inf')
+        high_bound = float('inf')
         if self.fence == 'inner':
             low_bound = self.inner_low
             high_bound = self.inner_high
@@ -489,17 +493,18 @@ class CustomTukeyTransformer(BaseEstimator, TransformerMixin):
         #print("Clipping with respect to: ", self.fence)
         #print("Low bound: ", low_bound)
         #print("High bound: ", high_bound)
-        X[self.target_column] = X[self.target_column].clip(lower=low_bound, upper=high_bound)
-        X = X.reset_index(drop=True)
+        X2[self.target_column] = X2[self.target_column].clip(lower=low_bound, upper=high_bound)
+        X2 = X2.reset_index(drop=True)
 
-        return X
+        return X2
 
     def fit_transform(self, X: pd.DataFrame, y=None):
         """
         Compute the inner and outer fences and clip values in the target column.
         """
-        self.fit(X, y)
-        return self.transform(X)
+        X2 = X.copy()
+        self.fit(X2, y)
+        return self.transform(X2)
 
 
 # For non-Challenge parts
