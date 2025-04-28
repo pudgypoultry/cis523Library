@@ -360,7 +360,7 @@ class CustomSigma3Transformer(BaseEstimator, TransformerMixin):
         """Computes the low and high boundaries for clipping."""
         #assert isinstance(X, pd.core.frame.DataFrame), f'expected Dataframe but got {type(X)} instead.'
         assert self.target_column in X.columns.to_list(), f'unknown column {self.target_column}'
-        assert pd.api.types.is_numeric_dtype(X[self.target_column]), f'expected int or float in column {self.target_column}'
+        #assert pd.api.types.is_numeric_dtype(X[self.target_column]), f'expected int or float in column {self.target_column}'
 
         self.has_been_fit = True
         mean = X[self.target_column].mean()
@@ -452,7 +452,7 @@ class CustomTukeyTransformer(BaseEstimator, TransformerMixin):
         assert self.has_been_fit, "Fit method has not been called."
         # assert isinstance(X, pd.DataFrame), f"Expected DataFrame, got {type(X)}"
         assert self.target_column in X.columns, f"Column '{self.target_column}' not found"
-        assert pd.api.types.is_numeric_dtype(X[self.target_column]), f"Column '{self.target_column}' must be numeric"
+        #assert pd.api.types.is_numeric_dtype(X[self.target_column]), f"Column '{self.target_column}' must be numeric"
         low_bound = -float('inf')
         high_bound = -float('inf')
         if self.fence == 'inner':
