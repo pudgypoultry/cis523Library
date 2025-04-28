@@ -586,6 +586,8 @@ titanic_transformer = Pipeline(steps=[
     #add your new ohe step below
     ('ohe', CustomOHETransformer(target_column='Joined')),
     ('fare', CustomTukeyTransformer('Fare', 'outer')),
+    ('Scalar - Age', CustomRobustTransformer('Age')),
+    ('Scalar - Fare', CustomRobustTransformer('Fare')),
     ], verbose=True)
 
 customer_transformer = Pipeline(steps=[
