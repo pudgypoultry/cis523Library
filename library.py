@@ -349,41 +349,64 @@ class CustomOHETransformer(BaseEstimator, TransformerMixin):
 class CustomSigma3Transformer(BaseEstimator, TransformerMixin):
     """
     A transformer that applies 3-sigma clipping to a specified column in a pandas DataFrame.
+
+    This transformer follows the scikit-learn transformer interface and can be used in
+    a scikit-learn pipeline. It clips values in the target column to be within three standard
+    deviations from the mean.
+
+    Parameters
+    ----------
+    target_column : Hashable
+        The name of the column to apply 3-sigma clipping on.
+
+    Attributes
+    ----------
+    high_wall : Optional[float]
+        The upper bound for clipping, computed as mean + 3 * standard deviation.
+    low_wall : Optional[float]
+        The lower bound for clipping, computed as mean - 3 * standard deviation.
     """
-    def __init__(self, target_column: str):
+    def __init__(self, the_column: str):
         self.has_been_fit = False
-        self.target_column = target_column
+        self.target_column = the_column
         self.high_wall = None
         self.low_wall = None
+        self.mean = None
+        self.std = None
 
     def fit(self, X: pd.DataFrame, y=None):
-        """Computes the low and high boundaries for clipping."""
+
+        #assert isinstance(X, pd.core.frame.DataFrame), f'expected Dataframe but got {type(df)} instead.'
+        assert self.target_column in X.columns.to_list(), f'unknown column {self.target_column}'
+        assert pd.api.types.is_numeric_dtype(X[self.target_column]), f'expected int or float in column {self.target_column}'
+
+        self.has_been_fit = True
+
+        # Compute the mean and standard deviation of the column
+        self.mean = X[self.target_column].mean()
+        self.std = X[self.target_column].std()
+
+        # Compute the low and high boundaries
+        self.low_wall = self.mean - 3 * self.std
+        self.high_wall = self.mean + 3 * self.std
+
+
+    def transform(self, X: pd.DataFrame):
+
+        assert self.has_been_fit, 'Sigma3Transformer.fit has not been called.'
         #assert isinstance(X, pd.core.frame.DataFrame), f'expected Dataframe but got {type(X)} instead.'
         assert self.target_column in X.columns.to_list(), f'unknown column {self.target_column}'
         #assert pd.api.types.is_numeric_dtype(X[self.target_column]), f'expected int or float in column {self.target_column}'
 
-        self.has_been_fit = True
-        mean = X[self.target_column].mean()
-        std = X[self.target_column].std()
-        self.low_wall = mean - 3 * std
-        self.high_wall = mean + 3 * std
-        return self
+        X[self.target_column] = X[self.target_column].clip(lower=self.low_wall, upper=self.high_wall)
+        X = X.reset_index(drop=True)
+        return X
 
-    def transform(self, X: pd.DataFrame) -> pd.DataFrame:
-        """Clips values in the target column to be within three standard deviations from the mean."""
-        #assert isinstance(X, pd.core.frame.DataFrame), f'expected Dataframe but got {type(X)} instead.'
-        assert self.target_column in X.columns.to_list(), f'unknown column {self.target_column}'
-        assert self.has_been_fit, 'Sigma3Transformer.fit has not been called.'
-        
-        # Create a new column with clipped values
-        X[f'Clipped_{self.target_column}'] = X[self.target_column].clip(lower=self.low_wall, upper=self.high_wall)
-        
-        return X.reset_index(drop=True)
 
     def fit_transform(self, X: pd.DataFrame, y=None):
-        """Computes the low and high boundaries for clipping and applies them to the target column."""
         self.fit(X, y)
         return self.transform(X)
+
 
 class CustomTukeyTransformer(BaseEstimator, TransformerMixin):
 #     """
