@@ -325,7 +325,7 @@ class CustomOHETransformer(BaseEstimator, TransformerMixin):
 
     def transform(self, X: pd.DataFrame) -> pd.DataFrame:
         # Check if all keys in mapping_dict are present in DataFrame columns
-        # assert isinstance(X, pd.core.frame.DataFrame), f'{self.__class__.__name__}.transform expected Dataframe but got {type(X)} instead.'
+        assert isinstance(X, pd.core.frame.DataFrame), f'{self.__class__.__name__}.transform expected Dataframe but got {type(X)} instead.'
         assert self.target_column in X.columns.to_list(), f'{self.__class__.__name__}.transform unknown column "{self.target_column}"'  #column legit?
 
         X_1 = X.copy()
@@ -376,7 +376,7 @@ class CustomSigma3Transformer(BaseEstimator, TransformerMixin):
 
     def fit(self, X: pd.DataFrame, y=None):
 
-        #assert isinstance(X, pd.core.frame.DataFrame), f'expected Dataframe but got {type(df)} instead.'
+        assert isinstance(X, pd.core.frame.DataFrame), f'expected Dataframe but got {type(df)} instead.'
         assert self.target_column in X.columns.to_list(), f'unknown column {self.target_column}'
         #assert pd.api.types.is_numeric_dtype(X[self.target_column]), f'expected int or float in column {self.target_column}'
         X2 = X.copy()
@@ -394,7 +394,7 @@ class CustomSigma3Transformer(BaseEstimator, TransformerMixin):
     def transform(self, X: pd.DataFrame):
 
         assert self.has_been_fit, 'Sigma3Transformer.fit has not been called.'
-        #assert isinstance(X, pd.core.frame.DataFrame), f'expected Dataframe but got {type(X)} instead.'
+        assert isinstance(X, pd.core.frame.DataFrame), f'expected Dataframe but got {type(X)} instead.'
         assert self.target_column in X.columns.to_list(), f'unknown column {self.target_column}'
         #assert pd.api.types.is_numeric_dtype(X[self.target_column]), f'expected int or float in column {self.target_column}'
 
