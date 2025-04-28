@@ -378,7 +378,7 @@ class CustomSigma3Transformer(BaseEstimator, TransformerMixin):
 
         #assert isinstance(X, pd.core.frame.DataFrame), f'expected Dataframe but got {type(df)} instead.'
         assert self.target_column in X.columns.to_list(), f'unknown column {self.target_column}'
-        assert pd.api.types.is_numeric_dtype(X[self.target_column]), f'expected int or float in column {self.target_column}'
+        #assert pd.api.types.is_numeric_dtype(X[self.target_column]), f'expected int or float in column {self.target_column}'
         X2 = X.copy()
         self.has_been_fit = True
 
@@ -456,7 +456,7 @@ class CustomTukeyTransformer(BaseEstimator, TransformerMixin):
         # assert isinstance(X, pd.DataFrame), f"Expected DataFrame, got {type(X)}"
         assert self.target_column in X.columns, f"Column '{self.target_column}' not found"
         assert self.fence in ['inner', 'outer'], f"Invalid 'fence' value. Must be 'inner' or 'outer'."
-        assert pd.api.types.is_numeric_dtype(X[self.target_column]), f"Column '{self.target_column}' must be numeric"
+        #assert pd.api.types.is_numeric_dtype(X[self.target_column]), f"Column '{self.target_column}' must be numeric"
 
         X2 = X.copy()
         self.has_been_fit = True
@@ -469,7 +469,7 @@ class CustomTukeyTransformer(BaseEstimator, TransformerMixin):
         self.outer_low = q1 - 3 * the_iqr
         self.inner_high = q3 + 1.5 * the_iqr
         self.outer_high = q3 + 3 * the_iqr
-        return self
+        #return self
 
     def transform(self, X: pd.DataFrame):
         """
@@ -478,7 +478,7 @@ class CustomTukeyTransformer(BaseEstimator, TransformerMixin):
         assert self.has_been_fit, "Fit method has not been called."
         # assert isinstance(X, pd.DataFrame), f"Expected DataFrame, got {type(X)}"
         assert self.target_column in X.columns, f"Column '{self.target_column}' not found"
-        assert pd.api.types.is_numeric_dtype(X[self.target_column]), f"Column '{self.target_column}' must be numeric"
+        #assert pd.api.types.is_numeric_dtype(X[self.target_column]), f"Column '{self.target_column}' must be numeric"
         X2 = X.copy()
         low_bound = -float('inf')
         high_bound = float('inf')
