@@ -154,7 +154,7 @@ class CustomMappingTransformer(BaseEstimator, TransformerMixin):
             A copy of the input DataFrame with mapping applied to the specified column.
         """
         #self.fit(X,y)  #commented out to avoid warning message in fit
-        result: pd.DataFrame = self.transform(X)
+        result = pd.DataFrame = self.transform(X)
         return result
 
 
