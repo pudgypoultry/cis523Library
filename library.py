@@ -617,34 +617,27 @@ class CustomKNNTransformer(BaseEstimator, TransformerMixin):
         return self.fit(X).transform(X)
 
 
-# For non-Challenge parts
-titanic_transformer_test = Pipeline(steps=[
-    ('gender', CustomMappingTransformer('Gender', {'Male': 0, 'Female': 1})),
-    ('class', CustomMappingTransformer('Class', {'Crew': 0, 'C3': 1, 'C2': 2, 'C1': 3})),
-    #add your new ohe step below
-    ('ohe', CustomOHETransformer(target_column='Joined')),
-    ], verbose=True)
-
-
 titanic_transformer = Pipeline(steps=[
-    ('gender', CustomMappingTransformer('Gender', {'Male': 0, 'Female': 1})),
-    ('class', CustomMappingTransformer('Class', {'Crew': 0, 'C3': 1, 'C2': 2, 'C1': 3})),
-    #add your new ohe step below
-    ('ohe', CustomOHETransformer(target_column='Joined')),
-    ('fare', CustomTukeyTransformer('Fare', 'outer')),
-    ('Scalar - Age', CustomRobustTransformer('Age')),
-    ('Scalar - Fare', CustomRobustTransformer('Fare')),
+    ('map_gender', CustomMappingTransformer('Gender', {'Male': 0, 'Female': 1})),
+    ('map_class', CustomMappingTransformer('Class', {'Crew': 0, 'C3': 1, 'C2': 2, 'C1': 3})),
+    ('target_joined', CustomTargetTransformer(col='Joined', smoothing=10)),
+    ('tukey_age', CustomTukeyTransformer(target_column='Age', fence='outer')),
+    ('tukey_fare', CustomTukeyTransformer(target_column='Fare', fence='outer')),
+    ('scale_age', CustomRobustTransformer(target_column='Age')),
+    ('scale_fare', CustomRobustTransformer(target_column='Fare')),
+    ('impute', CustomKNNTransformer(n_neighbors=5)),
     ], verbose=True)
+
 
 customer_transformer = Pipeline(steps=[
-    #fill in the steps on your own
-    ('Drop Rating', CustomDropColumnsTransformer(['Rating'], 'drop')),
-    ('Drop ID', CustomDropColumnsTransformer(['ID'], 'drop')),
-    ('OHE OS', CustomOHETransformer(target_column='OS')),
-    ('OHE ISP', CustomOHETransformer(target_column='ISP')),
-    ('Map Gender', CustomMappingTransformer('Gender', {'Male': 0, 'Female': 1})),
-    ('Map Experience Level', CustomMappingTransformer('Experience Level', {'low': 0, 'medium': 1, 'high': 2})),
-    ('time spent', CustomTukeyTransformer('Time Spent', 'inner')),
-    ('Scalar - Time Spent', CustomRobustTransformer('Time Spent')),
+    ('map_os', CustomMappingTransformer('OS', {'Android': 0, 'iOS': 1})),
+    ('target_isp', CustomTargetTransformer(col='ISP')),
+    ('map_level', CustomMappingTransformer('Experience Level', {'low': 0, 'medium': 1, 'high':2})),
+    ('map_gender', CustomMappingTransformer('Gender', {'Male': 0, 'Female': 1})),
+    ('tukey_age', CustomTukeyTransformer('Age', 'inner')),  #from chapter 4
+    ('tukey_time spent', CustomTukeyTransformer('Time Spent', 'inner')),  #from chapter 4
+    ('scale_age', CustomRobustTransformer(target_column='Age')), #from 5
+    ('scale_time spent', CustomRobustTransformer(target_column='Time Spent')), #from 5
+    ('impute', CustomKNNTransformer(n_neighbors=5)),
     ], verbose=True)
 
