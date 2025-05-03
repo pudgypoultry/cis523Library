@@ -441,8 +441,8 @@ class CustomTukeyTransformer(BaseEstimator, TransformerMixin):
 #     >>> transformed_df
 #     """
 
-    def __init__(self, column: str, fence: str = 'outer'):
-        self.column = column
+    def __init__(self, target_column: str, fence: str = 'outer'):
+        self.column = target_column
         self.fence = fence
         self.inner_low = None
         self.outer_low = None
