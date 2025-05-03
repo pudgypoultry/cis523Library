@@ -784,6 +784,10 @@ def find_random_state(
     return rs_value, Var
 
 
+titanic_variance_based_split = 107
+customer_variance_based_split = 113 
+
+
 titanic_transformer = Pipeline(steps=[
     ('map_gender', CustomMappingTransformer('Gender', {'Male': 0, 'Female': 1})),
     ('map_class', CustomMappingTransformer('Class', {'Crew': 0, 'C3': 1, 'C2': 2, 'C1': 3})),
