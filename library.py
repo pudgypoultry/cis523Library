@@ -3,11 +3,12 @@ import pandas as pd
 import numpy as np
 import types
 import warnings
+import joblib
+import sklearn
 from typing import Dict, Any, Optional, Union, List, Set, Hashable, Literal, Tuple, Self, Iterable
 from sklearn.base import BaseEstimator, TransformerMixin
 from sklearn.impute import KNNImputer
 from sklearn.pipeline import Pipeline
-import sklearn
 from sklearn.metrics import f1_score
 sklearn.set_config(transform_output="pandas")  #says pass pandas tables through pipeline instead of numpy matrices
 
@@ -787,6 +788,8 @@ def find_random_state(
 titanic_variance_based_split = 107
 customer_variance_based_split = 113 
 
+fitted_pipeline = titanic_transformer.fit(X_train, y_train)  #notice just fit method called
+joblib.dump(fitted_pipeline, 'fitted_pipeline.pkl')  #and next move to GitHub
 
 titanic_transformer = Pipeline(steps=[
     ('map_gender', CustomMappingTransformer('Gender', {'Male': 0, 'Female': 1})),
