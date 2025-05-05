@@ -819,5 +819,11 @@ customer_transformer = Pipeline(steps=[
     ('impute', CustomKNNTransformer(n_neighbors=5)),
     ], verbose=True)
 
+X_train, X_test, y_train, y_test = train_test_split(titanic_features,   #all columns except target column
+                                                    labels,             #a list of values from target column, e.g., Survived
+                                                    test_size=0.2,      #percent to put in test set
+                                                    shuffle=True,        #whether to randomly shuffle rows (and labels) first
+                                                    random_state=0)     #a seed for the random shuffle
+
 fitted_pipeline = titanic_transformer.fit(X_train, y_train)  #notice just fit method called
 joblib.dump(fitted_pipeline, 'fitted_pipeline.pkl')  #and next move to GitHub
