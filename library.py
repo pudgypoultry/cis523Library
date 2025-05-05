@@ -797,7 +797,7 @@ customer_variance_based_split = 113
 url = 'https://raw.githubusercontent.com/fickas/asynch_models/refs/heads/main/datasets/titanic_trimmed.csv'
 titanic_trimmed = pd.read_csv(url)
 titanic_features = titanic_trimmed.drop(columns='Survived')
-labels = titanic_trimmed['Survived'].to_list()
+titanic_labels = titanic_trimmed['Survived'].to_list()
 
 titanic_transformer = Pipeline(steps=[
     ('map_gender', CustomMappingTransformer('Gender', {'Male': 0, 'Female': 1})),
@@ -824,7 +824,7 @@ customer_transformer = Pipeline(steps=[
     ], verbose=True)
 
 X_train, X_test, y_train, y_test = train_test_split(titanic_features,   #all columns except target column
-                                                    labels,             #a list of values from target column, e.g., Survived
+                                                    titanic_labels,             #a list of values from target column, e.g., Survived
                                                     test_size=0.2,      #percent to put in test set
                                                     shuffle=True,        #whether to randomly shuffle rows (and labels) first
                                                     random_state=0)     #a seed for the random shuffle
