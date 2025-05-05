@@ -1,6 +1,7 @@
 from __future__ import annotations  #must be first line in your library!
 import pandas as pd
 import numpy as np
+!pip install category_encoders
 import category_encoders as ce
 import types
 import warnings
