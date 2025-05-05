@@ -788,9 +788,6 @@ def find_random_state(
 titanic_variance_based_split = 107
 customer_variance_based_split = 113 
 
-fitted_pipeline = titanic_transformer.fit(X_train, y_train)  #notice just fit method called
-joblib.dump(fitted_pipeline, 'fitted_pipeline.pkl')  #and next move to GitHub
-
 titanic_transformer = Pipeline(steps=[
     ('map_gender', CustomMappingTransformer('Gender', {'Male': 0, 'Female': 1})),
     ('map_class', CustomMappingTransformer('Class', {'Crew': 0, 'C3': 1, 'C2': 2, 'C1': 3})),
@@ -815,3 +812,5 @@ customer_transformer = Pipeline(steps=[
     ('impute', CustomKNNTransformer(n_neighbors=5)),
     ], verbose=True)
 
+fitted_pipeline = titanic_transformer.fit(X_train, y_train)  #notice just fit method called
+joblib.dump(fitted_pipeline, 'fitted_pipeline.pkl')  #and next move to GitHub
