@@ -1,7 +1,7 @@
 from __future__ import annotations  #must be first line in your library!
 import pandas as pd
 import numpy as np
-import category_encoders as ce
+#import category_encoders as ce
 import types
 import warnings
 import joblib
