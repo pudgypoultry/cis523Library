@@ -794,6 +794,11 @@ def find_random_state(
 titanic_variance_based_split = 107
 customer_variance_based_split = 113 
 
+url = 'https://raw.githubusercontent.com/fickas/asynch_models/refs/heads/main/datasets/titanic_trimmed.csv'
+titanic_trimmed = pd.read_csv(url)
+titanic_features = titanic_trimmed.drop(columns='Survived')
+labels = titanic_trimmed['Survived'].to_list()
+
 titanic_transformer = Pipeline(steps=[
     ('map_gender', CustomMappingTransformer('Gender', {'Male': 0, 'Female': 1})),
     ('map_class', CustomMappingTransformer('Class', {'Crew': 0, 'C3': 1, 'C2': 2, 'C1': 3})),
