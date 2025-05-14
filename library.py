@@ -814,12 +814,6 @@ def dataset_setup(original_table, label_column_name:str, the_transformer, rs, ts
   return X_train_numpy, X_test_numpy, y_train_numpy,  y_test_numpy
 
 
-def titanic_setup(titanic_table, transformer=titanic_transformer, rs=titanic_variance_based_split, ts=.2):
-  return dataset_setup(titanic_table, 'Survived', transformer, rs, ts=.2)
-
-def customer_setup(customer_table, transformer=customer_transformer, rs=customer_variance_based_split, ts=.2):
-    return dataset_setup(customer_table, 'Rating', transformer, rs, ts=.2)
-
 titanic_variance_based_split = 107
 customer_variance_based_split = 113 
 
@@ -852,6 +846,7 @@ customer_transformer = Pipeline(steps=[
     ('impute', CustomKNNTransformer(n_neighbors=5)),
     ], verbose=True)
 
+
 X_train, X_test, y_train, y_test = train_test_split(titanic_features,   #all columns except target column
                                                     titanic_labels,             #a list of values from target column, e.g., Survived
                                                     test_size=0.2,      #percent to put in test set
@@ -860,3 +855,9 @@ X_train, X_test, y_train, y_test = train_test_split(titanic_features,   #all col
 
 fitted_pipeline = titanic_transformer.fit(X_train, y_train)  #notice just fit method called
 joblib.dump(fitted_pipeline, 'fitted_pipeline.pkl')  #and next move to GitHub
+
+def titanic_setup(titanic_table, transformer=titanic_transformer, rs=titanic_variance_based_split, ts=.2):
+  return dataset_setup(titanic_table, 'Survived', transformer, rs, ts=.2)
+
+def customer_setup(customer_table, transformer=customer_transformer, rs=customer_variance_based_split, ts=.2):
+    return dataset_setup(customer_table, 'Rating', transformer, rs, ts=.2)
