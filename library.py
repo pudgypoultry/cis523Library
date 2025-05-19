@@ -12,10 +12,12 @@ from sklearn.base import BaseEstimator, TransformerMixin
 from sklearn.impute import KNNImputer
 from sklearn.pipeline import Pipeline
 from sklearn.metrics import precision_score, recall_score, f1_score, accuracy_score, roc_auc_score
+from sklearn.linear_model import LogisticRegressionCV
 from sklearn.neighbors import KNeighborsClassifier
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import _encoders
 from sklearn.preprocessing import FunctionTransformer
+
 sklearn.set_config(transform_output="pandas")  #says pass pandas tables through pipeline instead of numpy matrices
 
 
