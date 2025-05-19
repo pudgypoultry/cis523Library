@@ -17,6 +17,7 @@ from sklearn.neighbors import KNeighborsClassifier
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import _encoders
 from sklearn.preprocessing import FunctionTransformer
+from sklearn.model_selection import ParameterGrid
 
 sklearn.set_config(transform_output="pandas")  #says pass pandas tables through pipeline instead of numpy matrices
 
@@ -887,3 +888,35 @@ def threshold_results(thresh_list, actuals, predicted):
 
     fancy_df = result_df.style.highlight_max(color = 'pink', axis = 0).format(precision=2).set_properties(**properties).set_table_styles([headers])
     return (result_df, fancy_df)
+
+
+def halving_search(model, grid, x_train, y_train, factor=2, min_resources="exhaust", scoring='roc_auc'):
+    #your code below
+    halving_cv = HalvingGridSearchCV(
+        model, grid,
+        scoring=scoring,
+        n_jobs=-1,
+        min_resources=min_resources,
+        factor=2,
+        cv=5, random_state=1234,
+        refit=True
+        )
+
+    halving_cv.fit(x_train, y_train)
+
+    df = pd.DataFrame(halving_cv.cv_results_)
+
+    return halving_cv
+
+
+def sort_grid(grid):
+  sorted_grid = grid.copy()
+
+  #sort values - note that this will expand range for you
+  for k,v in sorted_grid.items():
+    sorted_grid[k] = sorted(sorted_grid[k], key=lambda x: (x is None, x))  #handles cases where None is an alternative value
+
+  #sort keys
+  sorted_grid = dict(sorted(sorted_grid.items()))
+
+  return sorted_grid
