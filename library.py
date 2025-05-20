@@ -14,7 +14,8 @@ from sklearn.pipeline import Pipeline
 from sklearn.metrics import precision_score, recall_score, f1_score, accuracy_score, roc_auc_score
 from sklearn.linear_model import LogisticRegressionCV
 from sklearn.neighbors import KNeighborsClassifier
-from sklearn.model_selection import train_test_split
+from sklearn.experimental import enable_halving_search_cv
+from sklearn.model_selection import train_test_split, HalvingGridSearchCV
 from sklearn.preprocessing import _encoders
 from sklearn.preprocessing import FunctionTransformer
 from sklearn.model_selection import ParameterGrid
