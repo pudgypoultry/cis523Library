@@ -1,57 +1,65 @@
-# Titanic Data Pipeline Documentation
+# MTG Card Data Pipeline Documentation
 
 ## Pipeline Overview
-This pipeline preprocesses the Titanic dataset to prepare it for machine learning modeling. It handles categorical encoding, target encoding, outlier detection and treatment, feature scaling, and missing value imputation.
+This pipeline preprocesses the MTG Card dataset to prepare it for machine learning modeling. It handles categorical encoding, target encoding, outlier detection and treatment, feature scaling, and missing value imputation.
 
 <img src="https://github.com/pudgypoultry/cis523Library/blob/ae2443e41de9f899719e6f25482cff40b7c70391/pipeline-image.png" width="70%" alt="Pipeline Diagram">
 
 ## Step-by-Step Design Choices
 
-### 1. Gender Mapping (`map_gender`)
-- **Transformer:** `CustomMappingTransformer('Gender', {'Male': 0, 'Female': 1})`
-- **Design Choice:** Binary encoding of gender with female as 1 and male as 0
+### 1. Banned or Not Mapping (`map_Banned_in_Commander`)
+- **Transformer:** `CustomMappingTransformer('map_Banned_in_Commander', {'No': 0, 'Yes': 1})`
+- **Design Choice:** Binary encoding of whether or not the card is banned in the most popular casual format of the game
 - **Rationale:** Simple categorical mapping that preserves the binary nature of the feature without increasing dimensionality
 
-### 2. Class Mapping (`map_class`)
-- **Transformer:** `CustomMappingTransformer('Class', {'Crew': 0, 'C3': 1, 'C2': 2, 'C1': 3})`
-- **Design Choice:** Ordinal encoding of passenger class from lowest (Crew) to highest (C1)
-- **Rationale:** Preserves the inherent ordering of passenger classes on the Titanic
+### 2. Unique Power Mapping (`map_Power_is_Unique`)
+- **Transformer:** `CustomMappingTransformer('PowerIsUnique', {'No': 0, 'Yes': 1})`
+- **Design Choice:** Binary encoding of whether or not the card has a non-numerical, unique power stat
+- **Rationale:** Simple categorical mapping that preserves the binary nature of the feature without increasing dimensionality
 
-### 3. Target Encoding for Joined Column (`target_joined`)
-- **Transformer:** `CustomTargetTransformer(col='Joined', smoothing=10)`
-- **Design Choice:** Target encoding with smoothing factor of 10
+### 3. Unique Toughness Mapping (`map_Toughness_is_Unique`)
+- **Transformer:** `CustomMappingTransformer('ToughnessIsUnique', {'No': 0, 'Yes': 1})`
+- **Design Choice:** Binary encoding of whether or not the card has a non-numerical, unique toughness stat
 - **Rationale:** 
   - Replaces the categorical 'Joined' feature with its relationship to the target variable
   - Smoothing=10 balances between using the global mean (high smoothing) and the category mean (low smoothing)
   - Helps address potential overfitting from rare categories
 
-### 4. Outlier Treatment for Age (`tukey_age`)
-- **Transformer:** `CustomTukeyTransformer(target_column='Age', fence='outer')`
-- **Design Choice:** Tukey method with outer fence for identifying extreme outliers
+### 4. Target Encoding for Card Rarity (`target_rarity`)
+- **Transformer:** `CustomTargetTransformer(col='Printed Rarity', smoothing=10)`
+- **Design Choice:** Target encoding with smoothing factor of 10
 - **Rationale:** 
-  - Outer fence (Q1-3×IQR, Q3+3×IQR) identifies only the most extreme outliers
-  - Age may have legitimate outliers (very young or old passengers) that should be preserved unless extreme
+  - Replaces the categorical 'Printed Rarity' feature with its relationship to the target variable
+  - Smoothing=10 balances between using the global mean (high smoothing) and the category mean (low smoothing)
+  - Helps address potential overfitting from rare categories
 
-### 5. Outlier Treatment for Fare (`tukey_fare`)
-- **Transformer:** `CustomTukeyTransformer(target_column='Fare', fence='outer')`
+### 5. Outlier Treatment for Card Power (`tukey_Power`)
+- **Transformer:** `CustomTukeyTransformer(target_column='Power', fence='outer')`
 - **Design Choice:** Tukey method with outer fence for identifying extreme outliers
 - **Rationale:**
-  - Fare prices have high variability and legitimate outliers for luxury accommodations
+  - Power statistic has high variability and legitimate outliers with grouping closer to 0
   - Outer fence preserves most of the original distribution while handling extreme values
 
-### 6. Age Scaling (`scale_age`)
+### 6. Outlier Treatment for Fare (`tukey_Toughness`)
+- **Transformer:** `CustomTukeyTransformer(target_column='Toughness', fence='outer')`
+- **Design Choice:** Tukey method with outer fence for identifying extreme outliers
+- **Rationale:**
+  - Toughness statistic has high variability and legitimate outliers with grouping closer to 1
+  - Outer fence preserves most of the original distribution while handling extreme values
+
+### 6. Power Scaling (`scale_Power`)
 - **Transformer:** `CustomRobustTransformer(target_column='Age')`
 - **Design Choice:** Robust scaling for Age feature
 - **Rationale:**
   - Robust to outliers compared to standard scaling
   - Uses median and interquartile range instead of mean and standard deviation
-  - Appropriate for Age which may not follow normal distribution
+  - Appropriate for Power which may not follow normal distribution
 
-### 7. Fare Scaling (`scale_fare`)
+### 7. Toughness Scaling (`scale_Toughness`)
 - **Transformer:** `CustomRobustTransformer(target_column='Fare')`
 - **Design Choice:** Robust scaling for Fare feature
 - **Rationale:**
-  - Fare has high variability and skewed distribution
+  - Toughness has high variability and skewed distribution
   - Robust scaling reduces influence of remaining outliers after Tukey treatment
 
 ### 8. Imputation (`impute`)
@@ -60,7 +68,7 @@ This pipeline preprocesses the Titanic dataset to prepare it for machine learnin
 - **Rationale:**
   - Uses relationships between features to estimate missing values
   - k=5 balances between too few neighbors (overfitting) and too many (underfitting)
-  - More appropriate than simple mean/median imputation given the relationships in Titanic data
+  - Since no columns are missing values, this shouldn't actually effect much, but leaving it in for completeness
 
 ## Pipeline Execution Order Rationale
 1. Categorical encoding first to prepare for subsequent numerical operations
