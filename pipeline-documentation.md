@@ -40,7 +40,7 @@ This pipeline preprocesses the MTG Card dataset to prepare it for machine learni
   - Power statistic has high variability and legitimate outliers with grouping closer to 0
   - Outer fence preserves most of the original distribution while handling extreme values
 
-### 6. Outlier Treatment for Fare (`tukey_Toughness`)
+### 6. Outlier Treatment for Card Toughness (`tukey_Toughness`)
 - **Transformer:** `CustomTukeyTransformer(target_column='Toughness', fence='outer')`
 - **Design Choice:** Tukey method with outer fence for identifying extreme outliers
 - **Rationale:**
