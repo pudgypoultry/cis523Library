@@ -7,17 +7,12 @@ This pipeline preprocesses the MTG Card dataset to prepare it for machine learni
 
 ## Step-by-Step Design Choices
 
-### 1. Banned or Not Mapping (`map_Banned_in_Commander`)
-- **Transformer:** `CustomMappingTransformer('map_Banned_in_Commander', {'No': 0, 'Yes': 1})`
-- **Design Choice:** Binary encoding of whether or not the card is banned in the most popular casual format of the game
-- **Rationale:** Simple categorical mapping that preserves the binary nature of the feature without increasing dimensionality
-
-### 2. Unique Power Mapping (`map_Power_is_Unique`)
+### 1. Unique Power Mapping (`map_Power_is_Unique`)
 - **Transformer:** `CustomMappingTransformer('PowerIsUnique', {'No': 0, 'Yes': 1})`
 - **Design Choice:** Binary encoding of whether or not the card has a non-numerical, unique power stat
 - **Rationale:** Simple categorical mapping that preserves the binary nature of the feature without increasing dimensionality
 
-### 3. Unique Toughness Mapping (`map_Toughness_is_Unique`)
+### 2. Unique Toughness Mapping (`map_Toughness_is_Unique`)
 - **Transformer:** `CustomMappingTransformer('ToughnessIsUnique', {'No': 0, 'Yes': 1})`
 - **Design Choice:** Binary encoding of whether or not the card has a non-numerical, unique toughness stat
 - **Rationale:** 
@@ -25,7 +20,7 @@ This pipeline preprocesses the MTG Card dataset to prepare it for machine learni
   - Smoothing=10 balances between using the global mean (high smoothing) and the category mean (low smoothing)
   - Helps address potential overfitting from rare categories
 
-### 4. Target Encoding for Card Rarity (`target_rarity`)
+### 3. Target Encoding for Card Rarity (`target_rarity`)
 - **Transformer:** `CustomTargetTransformer(col='Printed Rarity', smoothing=10)`
 - **Design Choice:** Target encoding with smoothing factor of 10
 - **Rationale:** 
@@ -33,14 +28,14 @@ This pipeline preprocesses the MTG Card dataset to prepare it for machine learni
   - Smoothing=10 balances between using the global mean (high smoothing) and the category mean (low smoothing)
   - Helps address potential overfitting from rare categories
 
-### 5. Outlier Treatment for Card Power (`tukey_Power`)
+### 4. Outlier Treatment for Card Power (`tukey_Power`)
 - **Transformer:** `CustomTukeyTransformer(target_column='Power', fence='outer')`
 - **Design Choice:** Tukey method with outer fence for identifying extreme outliers
 - **Rationale:**
   - Power statistic has high variability and legitimate outliers with grouping closer to 0
   - Outer fence preserves most of the original distribution while handling extreme values
 
-### 6. Outlier Treatment for Card Toughness (`tukey_Toughness`)
+### 5. Outlier Treatment for Card Toughness (`tukey_Toughness`)
 - **Transformer:** `CustomTukeyTransformer(target_column='Toughness', fence='outer')`
 - **Design Choice:** Tukey method with outer fence for identifying extreme outliers
 - **Rationale:**
