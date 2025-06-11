@@ -3,7 +3,7 @@
 ## Pipeline Overview
 This pipeline preprocesses the MTG Card dataset to prepare it for machine learning modeling. It handles categorical encoding, target encoding, outlier detection and treatment, feature scaling, and missing value imputation.
 
-<img src="https://github.com/pudgypoultry/cis523Library/blob/ae2443e41de9f899719e6f25482cff40b7c70391/pipeline-image.png" width="70%" alt="Pipeline Diagram">
+<img src="https://github.com/pudgypoultry/cis523Library/blob/49fcf6a5244833c3163ae4c1708aa0e8abecc1a6/PipelinePicture.png" width="70%" alt="Pipeline Diagram">
 
 ## Step-by-Step Design Choices
 
