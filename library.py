@@ -851,6 +851,17 @@ customer_transformer = Pipeline(steps=[
     ], verbose=True)
 
 
+card_transformer = Pipeline(steps=[
+    ('map_Power_is_Unique', CustomMappingTransformer('PowerIsUnique', {'No': 0, 'Yes': 1})),
+    ('map_Toughness_is_Unique', CustomMappingTransformer('ToughnessIsUnique', {'No': 0, 'Yes': 1})),
+    ('target_rarity', CustomTargetTransformer(col='Printed Rarity', smoothing=10)),
+    ('tukey_Power', CustomTukeyTransformer(target_column='Power', fence='outer')),
+    ('tukey_Toughness', CustomTukeyTransformer(target_column='Toughness', fence='outer')),
+    ('scale_Power', CustomRobustTransformer(target_column='Power')),
+    ('scale_Toughness', CustomRobustTransformer(target_column='Toughness')),
+    ('impute', CustomKNNTransformer(n_neighbors=5)),
+    ], verbose=True)
+
 X_train, X_test, y_train, y_test = train_test_split(titanic_features,   #all columns except target column
                                                     titanic_labels,             #a list of values from target column, e.g., Survived
                                                     test_size=0.2,      #percent to put in test set
