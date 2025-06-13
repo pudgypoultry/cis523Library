@@ -541,22 +541,22 @@ class CustomRobustTransformer(BaseEstimator, TransformerMixin):
           The median of the target column.
     """
     def __init__(self, target_column):
-        self.column = target_column
+        self.target_column = target_column
         self.iqr = None
         self.med = None
         self.has_fit = False
 
     def fit(self, X, y=None):
-        assert self.column in X.columns, f"Column '{self.column}' not found in DataFrame."
+        assert self.target_column in X.columns, f"Column '{self.target_column}' not found in DataFrame."
 
         self.has_fit = True
         # Calculate the IQR and median for the specified column, handling potential errors
         try:
-            self.iqr = X[self.column].quantile(0.75) - X[self.column].quantile(0.25)
-            self.med = X[self.column].median()
+            self.iqr = X[self.target_column].quantile(0.75) - X[self.target_column].quantile(0.25)
+            self.med = X[self.target_column].median()
             # Check if iqr is zero
             if self.iqr == 0:
-              print(f"Warning: IQR for column '{self.column}' is zero. Scaling will be skipped.")
+              print(f"Warning: IQR for column '{self.target_column}' is zero. Scaling will be skipped.")
               
         except Exception as e:
           print(f"Error during fit: {e}")
@@ -572,11 +572,11 @@ class CustomRobustTransformer(BaseEstimator, TransformerMixin):
 
         # Check if the specified column exists
         assert self.has_fit, "NotFittedError: This CustomRobustTransformer instance is not fitted yet. Call 'fit' with appropriate arguments before using this estimator."
-        assert self.column in X_transformed.columns, f"Column '{self.column}' not found in DataFrame."
+        assert self.target_column in X_transformed.columns, f"Column '{self.target_column}' not found in DataFrame."
             
         if self.iqr is not None and self.iqr != 0 :
             # Apply robust scaling to the specified column
-            X_transformed[self.column] = (X_transformed[self.column] - self.med) / self.iqr
+            X_transformed[self.target_column] = (X_transformed[self.target_column] - self.med) / self.iqr
         
         return X_transformed
     
