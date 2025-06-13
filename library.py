@@ -454,7 +454,7 @@ class CustomTukeyTransformer(BaseEstimator, TransformerMixin):
 #     """
 
     def __init__(self, target_column: str, fence: str = 'outer'):
-        self.column = target_column
+        self.target_column = target_column
         self.fence = fence
         self.inner_low = None
         self.outer_low = None
@@ -467,15 +467,15 @@ class CustomTukeyTransformer(BaseEstimator, TransformerMixin):
         Compute the inner and outer fences for Tukey's method.
         """
         # assert isinstance(X, pd.DataFrame), f"Expected DataFrame, got {type(X)}"
-        assert self.column in X.columns, f"Column '{self.column}' not found"
+        assert self.target_column in X.columns, f"Column '{self.target_column}' not found"
         assert self.fence in ['inner', 'outer'], f"Invalid 'fence' value. Must be 'inner' or 'outer'."
         #assert pd.api.types.is_numeric_dtype(X[self.target_column]), f"Column '{self.target_column}' must be numeric"
 
         X2 = X.copy()
         self.has_been_fit = True
 
-        q1 = X2[self.column].quantile(0.25)
-        q3 = X2[self.column].quantile(0.75)
+        q1 = X2[self.target_column].quantile(0.25)
+        q3 = X2[self.target_column].quantile(0.75)
         the_iqr = q3 - q1
 
         self.inner_low = q1 - 1.5 * the_iqr
@@ -490,7 +490,7 @@ class CustomTukeyTransformer(BaseEstimator, TransformerMixin):
         """
         assert self.has_been_fit, "Fit method has not been called."
         # assert isinstance(X, pd.DataFrame), f"Expected DataFrame, got {type(X)}"
-        assert self.column in X.columns, f"Column '{self.column}' not found"
+        assert self.target_column in X.columns, f"Column '{self.target_column}' not found"
         #assert pd.api.types.is_numeric_dtype(X[self.target_column]), f"Column '{self.target_column}' must be numeric"
         X2 = X.copy()
         low_bound = -float('inf')
@@ -506,7 +506,7 @@ class CustomTukeyTransformer(BaseEstimator, TransformerMixin):
         #print("Clipping with respect to: ", self.fence)
         #print("Low bound: ", low_bound)
         #print("High bound: ", high_bound)
-        X2[self.column] = X2[self.column].clip(lower=low_bound, upper=high_bound)
+        X2[self.target_column] = X2[self.target_column].clip(lower=low_bound, upper=high_bound)
         X2 = X2.reset_index(drop=True)
 
         return X2
@@ -541,22 +541,22 @@ class CustomRobustTransformer(BaseEstimator, TransformerMixin):
           The median of the target column.
     """
     def __init__(self, target_column):
-        self.column = target_column
+        self.target_column = target_column
         self.iqr = None
         self.med = None
         self.has_fit = False
 
     def fit(self, X, y=None):
-        assert self.column in X.columns, f"Column '{self.column}' not found in DataFrame."
+        assert self.target_column in X.columns, f"Column '{self.target_column}' not found in DataFrame."
 
         self.has_fit = True
         # Calculate the IQR and median for the specified column, handling potential errors
         try:
-            self.iqr = X[self.column].quantile(0.75) - X[self.column].quantile(0.25)
-            self.med = X[self.column].median()
+            self.iqr = X[self.target_column].quantile(0.75) - X[self.target_column].quantile(0.25)
+            self.med = X[self.target_column].median()
             # Check if iqr is zero
             if self.iqr == 0:
-              print(f"Warning: IQR for column '{self.column}' is zero. Scaling will be skipped.")
+              print(f"Warning: IQR for column '{self.target_column}' is zero. Scaling will be skipped.")
               
         except Exception as e:
           print(f"Error during fit: {e}")
@@ -572,11 +572,11 @@ class CustomRobustTransformer(BaseEstimator, TransformerMixin):
 
         # Check if the specified column exists
         assert self.has_fit, "NotFittedError: This CustomRobustTransformer instance is not fitted yet. Call 'fit' with appropriate arguments before using this estimator."
-        assert self.column in X_transformed.columns, f"Column '{self.column}' not found in DataFrame."
+        assert self.target_column in X_transformed.columns, f"Column '{self.target_column}' not found in DataFrame."
             
         if self.iqr is not None and self.iqr != 0 :
             # Apply robust scaling to the specified column
-            X_transformed[self.column] = (X_transformed[self.column] - self.med) / self.iqr
+            X_transformed[self.target_column] = (X_transformed[self.target_column] - self.med) / self.iqr
         
         return X_transformed
     
